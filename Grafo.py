@@ -1,5 +1,7 @@
 import networkx as nx
 from collections import deque
+import json
+import os
 
 
 class SocialtecGrafo:
@@ -120,3 +122,35 @@ class SocialtecGrafo:
             "foto": datos.get("foto"),
             "amigos": amigos
         }
+    def guardar(self, archivo="grafo.json"):
+        data = {
+            "nodos": [],
+            "aristas": list(self.grafo.edges())
+        }
+
+        for n, attrs in self.grafo.nodes(data=True):
+            data["nodos"].append({
+                "username": n,
+                "nombre": attrs["nombre"],
+                "foto": attrs.get("foto")
+            })
+
+        with open(archivo, "w") as f:
+            json.dump(data, f)
+
+    def cargar(self, archivo="grafo.json"):
+        if not os.path.exists(archivo):
+            return
+    
+        with open(archivo, "r") as f:
+            data = json.load(f)
+    
+        for n in data["nodos"]:
+            self.grafo.add_node(
+                n["username"],
+                nombre=n["nombre"],
+                foto=n.get("foto")
+            )
+    
+        for u, v in data["aristas"]:
+            self.grafo.add_edge(u, v)

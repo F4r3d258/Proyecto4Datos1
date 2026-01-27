@@ -1,27 +1,35 @@
+import json
+import os
 from passlib.context import CryptContext
 
 
 class AuthManager:
-    def __init__(self):
+    def __init__(self, archivo="usuarios.json"):
+        self.archivo = archivo
         self.pwd_context = CryptContext(
             schemes=["pbkdf2_sha256"],
             deprecated="auto"
         )
-
-        # Simula base de datos
         self.usuarios = {}
+        self.cargar()
+
+    def cargar(self):
+        if os.path.exists(self.archivo):
+            with open(self.archivo, "r") as f:
+                self.usuarios = json.load(f)
+
+    def guardar(self):
+        with open(self.archivo, "w") as f:
+            json.dump(self.usuarios, f)
 
     def registrar_usuario(self, username, password):
         if username in self.usuarios:
-            raise ValueError("El usuario ya existe")
+            raise ValueError("Usuario ya existe")
 
-        password_hash = self.pwd_context.hash(password)
-        self.usuarios[username] = password_hash
-        return True
+        self.usuarios[username] = self.pwd_context.hash(password)
+        self.guardar()
 
     def login(self, username, password):
         if username not in self.usuarios:
             return False
-
-        password_hash = self.usuarios[username]
-        return self.pwd_context.verify(password, password_hash)
+        return self.pwd_context.verify(password, self.usuarios[username])

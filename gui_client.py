@@ -29,6 +29,13 @@ class ClienteGUI:
             command=self.login
         ).pack(pady=15)
 
+        tk.Button(
+            self.root,
+            text="Crear usuario",
+            command=self.crear_usuario
+        ).pack(pady=5)
+
+
         self.root.mainloop()
 
     def login(self):
@@ -48,6 +55,38 @@ class ClienteGUI:
                 self.abrir_busqueda()
             else:
                 messagebox.showerror("Error", "Credenciales incorrectas")
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+    def crear_usuario(self):
+        usuario = self.entry_usuario.get()
+        password = self.entry_password.get()
+
+        if not usuario or not password:
+            messagebox.showerror("Error", "Debe completar todos los campos")
+            return
+
+        # Por simplicidad, usamos el username como nombre
+        nombre = usuario
+
+        try:
+            cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            cliente.connect((HOST, PORT))
+            cliente.send(f"REGISTRAR|{usuario}|{password}|{nombre}".encode())
+
+            respuesta = cliente.recv(1024).decode()
+            cliente.close()
+
+            if respuesta == "REGISTRO_OK":
+                messagebox.showinfo(
+                    "Éxito",
+                    "Usuario creado. Ahora puede iniciar sesión."
+                )
+            else:
+                messagebox.showerror(
+                    "Error",
+                    "El usuario ya existe"
+                )
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
@@ -76,6 +115,12 @@ class ClienteGUI:
             self.busqueda,
             text="Ver mis amigos",
             command=self.ver_amigos
+        ).pack(pady=5)
+
+        tk.Button(
+            self.busqueda,
+            text="Agregar amistad",
+            command=self.agregar_amistad
         ).pack(pady=5)
 
         tk.Button(
@@ -110,7 +155,34 @@ class ClienteGUI:
                 self.lista.insert(tk.END, u)
         else:
             messagebox.showinfo("Info", "No se encontraron usuarios")
-
+    
+    def agregar_amistad(self):
+        seleccion = self.lista.curselection()
+    
+        if not seleccion:
+            messagebox.showerror("Error", "Seleccione un usuario")
+            return
+    
+        usuario_seleccionado = self.lista.get(seleccion[0])
+    
+        if usuario_seleccionado == self.usuario_actual:
+            messagebox.showerror("Error", "No puedes agregarte a ti mismo")
+            return
+    
+        cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        cliente.connect((HOST, PORT))
+    
+        mensaje = f"AGREGAR_AMISTAD|{self.usuario_actual}|{usuario_seleccionado}"
+        cliente.send(mensaje.encode())
+    
+        respuesta = cliente.recv(1024).decode()
+        cliente.close()
+    
+        if respuesta == "AMISTAD_OK":
+            messagebox.showinfo("Éxito", "Amistad agregada")
+        else:
+            messagebox.showerror("Error", "No se pudo agregar la amistad")
+    
     def eliminar_amistad(self):
         seleccion = self.lista.curselection()
 

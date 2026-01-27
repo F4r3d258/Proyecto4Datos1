@@ -2,7 +2,6 @@ import socket
 import threading
 from auth import AuthManager
 from Grafo import SocialtecGrafo
-from gui_server import ServerGUI
 
 HOST = "127.0.0.1"
 PORT = 5000
@@ -12,21 +11,15 @@ class SocialtecServer:
     def __init__(self):
         self.auth = AuthManager()
         self.grafo = SocialtecGrafo()
+        self.grafo.cargar()
 
-        # Datos de prueba
-        self.auth.registrar_usuario("ana01", "1234")
-        self.auth.registrar_usuario("bob02", "abcd")
-
-        self.grafo.agregar_usuario("ana01", "Ana")
-        self.grafo.agregar_usuario("bob02", "Bob")
-        self.grafo.agregar_amistad("ana01", "bob02")
-
+    # MANEJO DE CLIENTES
     def manejar_cliente(self, conn, addr):
         print(f"[+] Cliente conectado: {addr}")
 
         try:
             while True:
-                data = conn.recv(1024).decode()
+                data = conn.recv(2048).decode()
                 if not data:
                     break
 
@@ -40,10 +33,12 @@ class SocialtecServer:
             conn.close()
             print(f"[-] Cliente desconectado: {addr}")
 
+    # PROCESADOR DE MENSAJES
     def procesar_mensaje(self, mensaje):
         partes = mensaje.split("|")
         comando = partes[0]
 
+        # ---------- LOGIN ----------
         if comando == "LOGIN":
             usuario = partes[1]
             password = partes[2]
@@ -53,37 +48,21 @@ class SocialtecServer:
             else:
                 return "LOGIN_ERROR"
 
-        return "COMANDO_DESCONOCIDO"
-
-    def iniciar(self):
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.bind((HOST, PORT))
-        server.listen()
-
-        print(f"[SERVER] Escuchando en {HOST}:{PORT}")
-
-        while True:
-            conn, addr = server.accept()
-            hilo = threading.Thread(
-                target=self.manejar_cliente,
-                args=(conn, addr),
-                daemon=True
-            )
-            hilo.start()
-     
-    def procesar_mensaje(self, mensaje):
-        partes = mensaje.split("|")
-        comando = partes[0]
-
-        if comando == "LOGIN":
+        # ---------- REGISTRO ----------
+        elif comando == "REGISTRAR":
             usuario = partes[1]
             password = partes[2]
+            nombre = partes[3]
 
-            if self.auth.login(usuario, password):
-                return "LOGIN_OK"
-            else:
-                return "LOGIN_ERROR"
+            try:
+                self.auth.registrar_usuario(usuario, password)
+                self.grafo.agregar_usuario(usuario, nombre)
+                self.grafo.guardar()
+                return "REGISTRO_OK"
+            except:
+                return "REGISTRO_ERROR"
 
+        # ---------- BUSCAR USUARIOS ----------
         elif comando == "BUSCAR":
             nombre = partes[1].lower()
             resultados = []
@@ -97,41 +76,41 @@ class SocialtecServer:
             else:
                 return "SIN_RESULTADOS"
 
+        # ---------- AGREGAR AMISTAD ----------
+        elif comando == "AGREGAR_AMISTAD":
+            u1 = partes[1]
+            u2 = partes[2]
+
+            try:
+                self.grafo.agregar_amistad(u1, u2)
+                self.grafo.guardar()
+                return "AMISTAD_OK"
+            except:
+                return "ERROR"
+
+        # ---------- ELIMINAR AMISTAD ----------
         elif comando == "ELIMINAR_AMISTAD":
             u1 = partes[1]
             u2 = partes[2]
 
             if self.grafo.grafo.has_edge(u1, u2):
                 self.grafo.eliminar_amistad(u1, u2)
+                self.grafo.guardar()
                 return "AMISTAD_ELIMINADA"
             else:
                 return "NO_SON_AMIGOS"
-            
+
+        # ---------- VER AMIGOS ----------
         elif comando == "AMIGOS":
             usuario = partes[1]
 
             if not self.grafo.usuario_existe(usuario):
                 return "ERROR"
-            
+
             amigos = self.grafo.obtener_amigos(usuario)
+            return "AMIGOS|" + ",".join(amigos)
 
-            if amigos:
-                return "AMIGOS|" + ",".join(amigos)
-            else:
-                return "AMIGOS|"
-            
-        elif comando == "PERFIL":
-            usuario = partes[1]
-            perfil = self.grafo.obtener_perfil(usuario)
-
-            if not perfil:
-                return "ERROR"
-
-            amigos = ",".join(perfil["amigos"])
-            foto = perfil["foto"] if perfil["foto"] else "None"
-
-            return f"PERFIL|{perfil['nombre']}|{foto}|{amigos}"
-        
+        # ---------- PERFIL ----------
         elif comando == "PERFIL":
             usuario = partes[1]
 
@@ -151,11 +130,23 @@ class SocialtecServer:
 
         return "COMANDO_DESCONOCIDO"
 
+    # INICIAR SERVIDOR
+    def iniciar(self):
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.bind((HOST, PORT))
+        server.listen()
+
+        print(f"[SERVER] Escuchando en {HOST}:{PORT}")
+
+        while True:
+            conn, addr = server.accept()
+            hilo = threading.Thread(
+                target=self.manejar_cliente,
+                args=(conn, addr),
+                daemon=True
+            )
+            hilo.start()
+
+
 if __name__ == "__main__":
-    server = SocialtecServer()
-
-    ServerGUI(server.grafo)
-    
-    server.iniciar()
-
-   
+    SocialtecServer().iniciar()
