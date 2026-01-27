@@ -105,6 +105,19 @@ class SocialtecServer:
                 return "AMISTAD_ELIMINADA"
             else:
                 return "NO_SON_AMIGOS"
+            
+        elif comando == "AMIGOS":
+            usuario = partes[1]
+
+            if not self.grafo.usuario_existe(usuario):
+                return "ERROR"
+            
+            amigos = self.grafo.obtener_amigos(usuario)
+
+            if amigos:
+                return "AMIGOS|" + ",".join(amigos)
+            else:
+                return "AMIGOS|"
 
         return "COMANDO_DESCONOCIDO"
 

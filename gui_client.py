@@ -74,6 +74,12 @@ class ClienteGUI:
 
         tk.Button(
             self.busqueda,
+            text="Ver mis amigos",
+            command=self.ver_amigos
+        ).pack(pady=5)
+
+        tk.Button(
+            self.busqueda,
             text="Eliminar amistad",
             command=self.eliminar_amistad
         ).pack(pady=5)
@@ -121,6 +127,69 @@ class ClienteGUI:
             messagebox.showinfo("Éxito", "Amistad eliminada")
         else:
             messagebox.showerror("Error", "No son amigos")
+
+
+    def ver_amigos(self):
+        cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        cliente.connect((HOST, PORT))
+        cliente.send(f"AMIGOS|{self.usuario_actual}".encode())
+
+        respuesta = cliente.recv(1024).decode()
+        cliente.close()
+
+        if not respuesta.startswith("AMIGOS"):
+            messagebox.showerror("Error", "No se pudieron obtener amigos")
+            return
+        
+        amigos = respuesta.split("|")[1]
+
+        if amigos == "":
+            messagebox.showinfo("Amigos", "No tienes amigos agregados")
+            return
+        
+        lista_amigos = amigos.split(",")
+
+        #Merge Sort
+        lista_ordenada = merge_sort(lista_amigos)
+
+        ventana = tk.Toplevel()
+        ventana.title("Mis Amigos (ordenados)")
+        ventana.geometry("250x300")
+
+        listbox = tk.Listbox(ventana)
+        listbox.pack(fill=tk.BOTH, expand=True)
+
+        for amigos in lista_ordenada:
+            listbox.insert(tk.END, amigo)
+
+
+def merge_sort(lista):
+    if len(lista) <= 1:
+        return lista
+    
+    medio = len(lista) // 2
+    izquierda = merge_sort(lista[:medio])
+    derecha = merge_sort(lista[medio:])
+
+    return merge(izquierda,derecha)
+
+def merge(izq, der):
+    resultado = []
+    i = j = 0
+
+    while i < len(izq) and j < len(der):
+        if izq[i].lower() <= der [j].lower():
+            resultado.append(izq[i])
+            i += 1
+
+        else:
+            resultado.append(der[j])
+            j += 1
+    
+    resultado.extend(izq[i:])
+    resultado.extend(der[:i])
+
+    return resultado
 
 
 if __name__ == "__main__":
