@@ -106,3 +106,17 @@ class SocialtecGrafo:
 
         # Si no existe path
         return None
+    
+    def obtener_perfil(self, username):
+        if username not in self.grafo:
+            return None
+
+        datos = self.grafo.nodes[username]
+        amigos = self.obtener_amigos(username)
+
+        return {
+            "username": username,
+            "nombre": datos["nombre"],
+            "foto": datos.get("foto"),
+            "amigos": amigos
+        }

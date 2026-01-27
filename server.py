@@ -2,6 +2,7 @@ import socket
 import threading
 from auth import AuthManager
 from Grafo import SocialtecGrafo
+from gui_server import ServerGUI
 
 HOST = "127.0.0.1"
 PORT = 5000
@@ -118,8 +119,43 @@ class SocialtecServer:
                 return "AMIGOS|" + ",".join(amigos)
             else:
                 return "AMIGOS|"
+            
+        elif comando == "PERFIL":
+            usuario = partes[1]
+            perfil = self.grafo.obtener_perfil(usuario)
+
+            if not perfil:
+                return "ERROR"
+
+            amigos = ",".join(perfil["amigos"])
+            foto = perfil["foto"] if perfil["foto"] else "None"
+
+            return f"PERFIL|{perfil['nombre']}|{foto}|{amigos}"
+        
+        elif comando == "PERFIL":
+            usuario = partes[1]
+
+            if not self.grafo.usuario_existe(usuario):
+                return "ERROR"
+
+            data = self.grafo.grafo.nodes[usuario]
+            nombre = data.get("nombre", "")
+            foto = data.get("foto")
+
+            amigos = self.grafo.obtener_amigos(usuario)
+
+            foto_str = foto if foto else "NO_DISPONIBLE"
+            amigos_str = ",".join(amigos) if amigos else ""
+
+            return f"PERFIL|{nombre}|{foto_str}|{amigos_str}"
 
         return "COMANDO_DESCONOCIDO"
 
 if __name__ == "__main__":
-    SocialtecServer().iniciar()
+    server = SocialtecServer()
+
+    ServerGUI(server.grafo)
+    
+    server.iniciar()
+
+   
