@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from Grafo import SocialtecGrafo
 
-
+#creación de la clase servidor para sus configuraciones
 class ServerGUI:
     def __init__(self, grafo):
         self.grafo = grafo
@@ -40,9 +40,7 @@ class ServerGUI:
 
         self.root.mainloop()
 
-    # ----------------------------
-    # ID 002 - Mostrar Grafo
-    # ----------------------------
+    #mostrar grafo de los usuarios
     def mostrar_grafo(self):
         if self.grafo.grafo.number_of_nodes() == 0:
             messagebox.showinfo("Info", "El grafo está vacío")
@@ -50,9 +48,7 @@ class ServerGUI:
 
         self.grafo.imprimir_grafo()
 
-    # ----------------------------
-    # ID 010 - Path entre usuarios
-    # ----------------------------
+    #mostrar el path entre los usuarios
     def buscar_path(self):
         ventana = tk.Toplevel()
         ventana.title("Buscar Path")
@@ -89,9 +85,7 @@ class ServerGUI:
             command=calcular
         ).pack(pady=10)
 
-    # ----------------------------
-    # ID 011 - Estadísticas
-    # ----------------------------
+    #muestra las estadisticas de los usuarios 
     def ver_estadisticas(self):
         stats = self.grafo.estadisticas()
 

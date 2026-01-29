@@ -6,10 +6,10 @@ import os
 
 class SocialtecGrafo:
     def __init__(self):
-        # Grafo no dirigido (amistad es bidireccional)
+        #grafo no dirigido (amistad es bidireccional)
         self.grafo = nx.Graph()
 
-    # USUARIOS
+    #USUARIOS
     def agregar_usuario(self, username, nombre, foto=None):
         if username in self.grafo:
             raise ValueError("El usuario ya existe")
@@ -19,7 +19,7 @@ class SocialtecGrafo:
     def usuario_existe(self, username):
         return username in self.grafo
 
-    # AMISTADES
+    #AMISTADES
     def agregar_amistad(self, user1, user2):
         if user1 not in self.grafo or user2 not in self.grafo:
             raise ValueError("Uno o ambos usuarios no existen")
@@ -39,7 +39,7 @@ class SocialtecGrafo:
 
         return list(self.grafo.neighbors(username))
 
-    # PATH ENTRE AMIGOS (ID 010)
+    #PATH ENTRE AMIGOS 
     def existe_path(self, origen, destino):
         if origen not in self.grafo or destino not in self.grafo:
             return None
@@ -49,7 +49,7 @@ class SocialtecGrafo:
         else:
             return None
 
-    # ESTADÍSTICAS (ID 011)
+    #ESTADÍSTICAS 
     def estadisticas(self):
         if self.grafo.number_of_nodes() == 0:
             return None
@@ -67,7 +67,7 @@ class SocialtecGrafo:
             "promedio_amigos": round(promedio, 2)
         }
 
-    # IMPRESIÓN DEL GRAFO (ID 002)
+    #IMPRESIÓN DEL GRAFO
     def imprimir_grafo(self):
         import matplotlib.pyplot as plt
 
@@ -81,7 +81,7 @@ class SocialtecGrafo:
         )
         plt.show()
 
-    # BFS, PATH ENTRE AMIGOS
+    #BFS, PATH ENTRE AMIGOS
     def bfs_path(self, origen, destino):
         if origen not in self.grafo or destino not in self.grafo:
             return None
@@ -89,24 +89,24 @@ class SocialtecGrafo:
         visitados = set()
         cola = deque()
 
-        # (nodo_actual, camino_hasta_ahora)
+        #(nodo_actual, camino_hasta_ahora)
         cola.append((origen, [origen]))
         visitados.add(origen)
 
         while cola:
             actual, camino = cola.popleft()
 
-            # Si llegamos al destino
+            #si llegamos al destino
             if actual == destino:
                 return camino
 
-            # Explorar vecinos
+            #explorar vecinos
             for vecino in self.grafo.neighbors(actual):
                 if vecino not in visitados:
                     visitados.add(vecino)
                     cola.append((vecino, camino + [vecino]))
 
-        # Si no existe path
+        #si no existe path
         return None
     
     def obtener_perfil(self, username):

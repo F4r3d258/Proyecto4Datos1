@@ -13,7 +13,7 @@ class SocialtecServer:
         self.grafo = SocialtecGrafo()
         self.grafo.cargar()
 
-    # MANEJO DE CLIENTES
+    #se determina el manejo de los clientes
     def manejar_cliente(self, conn, addr):
         print(f"[+] Cliente conectado: {addr}")
 
@@ -33,12 +33,12 @@ class SocialtecServer:
             conn.close()
             print(f"[-] Cliente desconectado: {addr}")
 
-    # PROCESADOR DE MENSAJES
+    #procesa solicitudes de usuarios
     def procesar_mensaje(self, mensaje):
         partes = mensaje.split("|")
         comando = partes[0]
 
-        # ---------- LOGIN ----------
+        #login de usuario
         if comando == "LOGIN":
             usuario = partes[1]
             password = partes[2]
@@ -48,7 +48,7 @@ class SocialtecServer:
             else:
                 return "LOGIN_ERROR"
 
-        # ---------- REGISTRO ----------
+        #registro de usuario
         elif comando == "REGISTRAR":
             usuario = partes[1]
             password = partes[2]
@@ -62,7 +62,7 @@ class SocialtecServer:
             except:
                 return "REGISTRO_ERROR"
 
-        # ---------- BUSCAR USUARIOS ----------
+        #busqueda de usuarios
         elif comando == "BUSCAR":
             nombre = partes[1].lower()
             resultados = []
@@ -76,7 +76,7 @@ class SocialtecServer:
             else:
                 return "SIN_RESULTADOS"
 
-        # ---------- AGREGAR AMISTAD ----------
+        #opcion de agregar amistad
         elif comando == "AGREGAR_AMISTAD":
             u1 = partes[1]
             u2 = partes[2]
@@ -88,7 +88,7 @@ class SocialtecServer:
             except:
                 return "ERROR"
 
-        # ---------- ELIMINAR AMISTAD ----------
+        #funcion de eliminar amistad
         elif comando == "ELIMINAR_AMISTAD":
             u1 = partes[1]
             u2 = partes[2]
@@ -100,7 +100,7 @@ class SocialtecServer:
             else:
                 return "NO_SON_AMIGOS"
 
-        # ---------- VER AMIGOS ----------
+        #funcion de ver amigos
         elif comando == "AMIGOS":
             usuario = partes[1]
 
@@ -110,7 +110,7 @@ class SocialtecServer:
             amigos = self.grafo.obtener_amigos(usuario)
             return "AMIGOS|" + ",".join(amigos)
 
-        # ---------- PERFIL ----------
+        #configuracion de perfil
         elif comando == "PERFIL":
             usuario = partes[1]
 
@@ -130,7 +130,7 @@ class SocialtecServer:
 
         return "COMANDO_DESCONOCIDO"
 
-    # INICIAR SERVIDOR
+    #inicio de servidor
     def iniciar(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind((HOST, PORT))

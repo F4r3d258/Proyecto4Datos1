@@ -5,14 +5,14 @@ from tkinter import messagebox
 HOST = "127.0.0.1"
 PORT = 5000
 
-
+#clase para la creación y funciones del usuario
 class ClienteGUI:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Socialtec - Cliente")
         self.root.geometry("300x200")
 
-        # --- Usuario ---
+        #usuario
         tk.Label(self.root, text="Usuario").pack(pady=5)
         self.entry_usuario = tk.Entry(self.root)
         self.entry_usuario.pack()
@@ -20,12 +20,12 @@ class ClienteGUI:
         self.entry_nombre = tk.Entry(self.root)
         self.entry_nombre.pack()
 
-        # --- Password ---
+        #contraseña
         tk.Label(self.root, text="Contraseña").pack(pady=5)
         self.entry_password = tk.Entry(self.root, show="*")
         self.entry_password.pack()
 
-        # --- Botón ---
+        #boton
         tk.Button(
             self.root,
             text="Iniciar Sesión",
@@ -61,6 +61,8 @@ class ClienteGUI:
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    
     def crear_usuario(self):
         usuario = self.entry_usuario.get()
         password = self.entry_password.get()
@@ -291,6 +293,7 @@ class ClienteGUI:
         else:
             listbox.insert(tk.END, "No tiene amigos")
 
+#se crea la funcion del merge sort para usarla en la busqueda de usuarios
 def merge_sort(lista):
     if len(lista) <= 1:
         return lista
