@@ -16,6 +16,9 @@ class ClienteGUI:
         tk.Label(self.root, text="Usuario").pack(pady=5)
         self.entry_usuario = tk.Entry(self.root)
         self.entry_usuario.pack()
+        tk.Label(self.root, text="Nombre completo").pack(pady=5)
+        self.entry_nombre = tk.Entry(self.root)
+        self.entry_nombre.pack()
 
         # --- Password ---
         tk.Label(self.root, text="Contraseña").pack(pady=5)
@@ -61,13 +64,11 @@ class ClienteGUI:
     def crear_usuario(self):
         usuario = self.entry_usuario.get()
         password = self.entry_password.get()
+        nombre = self.entry_nombre.get()
 
-        if not usuario or not password:
+        if not usuario or not password or not nombre:
             messagebox.showerror("Error", "Debe completar todos los campos")
             return
-
-        # Por simplicidad, usamos el username como nombre
-        nombre = usuario
 
         try:
             cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -131,7 +132,7 @@ class ClienteGUI:
 
         tk.Button(
             self.busqueda,
-            text="Ver mi perfil",
+            text="Ver perfil",
             command=self.ver_perfil
         ).pack(pady=5)
 
@@ -241,45 +242,54 @@ class ClienteGUI:
             listbox.insert(tk.END, amigo)
 
     def ver_perfil(self):
+        seleccion = self.lista.curselection()
+
+        if seleccion:
+            usuario = self.lista.get(seleccion[0])
+        else:
+            usuario = self.usuario_actual
+
         cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         cliente.connect((HOST, PORT))
-        cliente.send(f"PERFIL|{self.usuario_actual}".encode())
-    
+        cliente.send(f"PERFIL|{usuario}".encode())
+
         respuesta = cliente.recv(2048).decode()
         cliente.close()
-    
+
         if not respuesta.startswith("PERFIL"):
             messagebox.showerror("Error", "No se pudo cargar el perfil")
             return
-    
+
         _, nombre, foto, amigos = respuesta.split("|")
-    
+
         ventana = tk.Toplevel()
-        ventana.title("Mi Perfil")
+        ventana.title(f"Perfil de {usuario}")
         ventana.geometry("300x350")
-    
-        tk.Label(ventana, text=f"Usuario: {self.usuario_actual}",
-                 font=("Arial", 10, "bold")).pack(pady=5)
-    
+
+        tk.Label(
+            ventana,
+            text=f"Usuario: {usuario}",
+            font=("Arial", 10, "bold")
+        ).pack(pady=5)
+
         tk.Label(ventana, text=f"Nombre: {nombre}").pack(pady=5)
-    
+
         if foto == "NO_DISPONIBLE":
             tk.Label(ventana, text="Foto: No disponible").pack(pady=5)
         else:
             tk.Label(ventana, text=f"Foto: {foto}").pack(pady=5)
-    
+
         tk.Label(ventana, text="Amigos:").pack(pady=5)
-    
+
         listbox = tk.Listbox(ventana)
         listbox.pack(fill=tk.BOTH, expand=True, padx=10)
-    
+
         if amigos:
             lista_amigos = merge_sort(amigos.split(","))
             for amigo in lista_amigos:
                 listbox.insert(tk.END, amigo)
         else:
             listbox.insert(tk.END, "No tiene amigos")
-
 
 def merge_sort(lista):
     if len(lista) <= 1:

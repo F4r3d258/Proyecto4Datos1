@@ -1,1 +1,1 @@
-{"nodos": [{"username": "fared03", "nombre": "fared03", "foto": null}, {"username": "santi04", "nombre": "santi04", "foto": null}], "aristas": [["fared03", "santi04"]]}
+{"nodos": [{"username": "fared03", "nombre": "fared03", "foto": null}, {"username": "santi04", "nombre": "santi04", "foto": null}, {"username": "rty", "nombre": "fared Carballo Quesada", "foto": null}, {"username": "d", "nombre": "daniel", "foto": null}], "aristas": [["fared03", "santi04"], ["fared03", "rty"], ["santi04", "rty"]]}
