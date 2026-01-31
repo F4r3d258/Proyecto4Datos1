@@ -13,7 +13,7 @@ class ServerGUI:
 
         tk.Label(
             self.root,
-            text="GUI DEL SERVER - SOCIALTEC",
+            text="SERVER - SOCIALTEC",
             font=("Arial", 14, "bold")
         ).pack(pady=10)
 
